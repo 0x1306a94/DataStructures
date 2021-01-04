@@ -9,6 +9,14 @@ import Foundation
 
 infix operator <=>: DefaultPrecedence
 public protocol BSTComparable {
+	/// 节点元素比较
+	/// - Parameters:
+	///   - lhs: 左节点元素
+	///   - rhs: 右节点元素
+	/// - Return:
+	///   - lt: lhs < rhs
+	///   - gt: lhs > rhs
+	///   - eq: lhs == rhs
 	static func <=> (lhs: Self, rhs: Self) -> ComparisonResult
 }
 
@@ -18,6 +26,7 @@ public enum ComparisonResult {
 	case eq // 等于
 }
 
+/// 二叉搜索树
 public class BST<E>: Tree where E: BSTComparable {
 	public typealias Element = E
 	public typealias BSTComparator = (Element, Element) -> ComparisonResult
@@ -44,9 +53,7 @@ public class BST<E>: Tree where E: BSTComparable {
 
 private extension BST {
 	func compare(lhs: Element, rhs: Element) -> ComparisonResult {
-		guard let comparator = comparator else {
-			return lhs <=> rhs
-		}
+		guard let comparator = comparator else { return lhs <=> rhs }
 		return comparator(lhs, rhs)
 	}
 }
@@ -74,13 +81,10 @@ public extension BST {
 		while node != nil {
 			cmp = compare(lhs: element, rhs: node!.element)
 			parent = node
-			if cmp == .lt {
-				node = node?.left
-			} else if cmp == .gt {
-				node = node?.right
-			} else {
-				node?.element = element
-				return
+			switch cmp {
+			case .lt: node = node?.left
+			case .gt: node = node?.right
+			default: node?.element = element; return
 			}
 		}
 		if cmp == .lt {
