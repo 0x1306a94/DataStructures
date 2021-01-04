@@ -22,7 +22,7 @@ public class BST<E>: Tree where E: BSTComparable {
 	public typealias Element = E
 	public typealias BSTComparator = (Element, Element) -> ComparisonResult
 
-	class Node<Element> {
+	private class Node<Element> {
 		var element: Element!
 		var left: Node<Element>?
 		var right: Node<Element>?
@@ -34,9 +34,9 @@ public class BST<E>: Tree where E: BSTComparable {
 		}
 	}
 
-	var _size: Int = 0
-	var root: Node<Element>?
-	let comparator: BSTComparator?
+	private var _size: Int = 0
+	private var root: Node<Element>?
+	private let comparator: BSTComparator?
 	init(comparator: BSTComparator? = nil) {
 		self.comparator = comparator
 	}
