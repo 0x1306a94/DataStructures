@@ -1,5 +1,5 @@
 //
-//  BST.swift
+//  BinarySearchTree.swift
 //  DataStructures
 //
 //  Created by king on 2020/9/23.
@@ -8,7 +8,7 @@
 import Foundation
 
 infix operator <=>: DefaultPrecedence
-public protocol BSTComparable {
+public protocol BinarySearchTreeComparable {
 	/// 节点元素比较
 	/// - Parameters:
 	///   - lhs: 左节点元素
@@ -17,19 +17,19 @@ public protocol BSTComparable {
 	///   - lt: lhs < rhs
 	///   - gt: lhs > rhs
 	///   - eq: lhs == rhs
-	static func <=> (lhs: Self, rhs: Self) -> ComparisonResult
+	static func <=> (lhs: Self, rhs: Self) -> BinarySearchTreeComparisonResult
 }
 
-public enum ComparisonResult {
+public enum BinarySearchTreeComparisonResult {
 	case lt // 小于
 	case gt // 大于
 	case eq // 等于
 }
 
 /// 二叉搜索树
-public class BST<E>: Tree where E: BSTComparable {
+public class BinarySearchTree<E>: Tree where E: BinarySearchTreeComparable {
 	public typealias Element = E
-	public typealias BSTComparator = (Element, Element) -> ComparisonResult
+	public typealias BinarySearchTreeComparator = (Element, Element) -> BinarySearchTreeComparisonResult
 
 	private class Node<Element> {
 		var element: Element!
@@ -45,20 +45,20 @@ public class BST<E>: Tree where E: BSTComparable {
 
 	private var _size: Int = 0
 	private var root: Node<Element>?
-	private let comparator: BSTComparator?
-	init(comparator: BSTComparator? = nil) {
+	private let comparator: BinarySearchTreeComparator?
+	init(comparator: BinarySearchTreeComparator? = nil) {
 		self.comparator = comparator
 	}
 }
 
-private extension BST {
-	func compare(lhs: Element, rhs: Element) -> ComparisonResult {
+private extension BinarySearchTree {
+	func compare(lhs: Element, rhs: Element) -> BinarySearchTreeComparisonResult {
 		guard let comparator = comparator else { return lhs <=> rhs }
 		return comparator(lhs, rhs)
 	}
 }
 
-public extension BST {
+public extension BinarySearchTree {
 	func size() -> Int {
 		return _size
 	}
@@ -76,7 +76,7 @@ public extension BST {
 
 		var node: Node<Element>? = root
 		var parent: Node<Element>? = root
-		var cmp: ComparisonResult = .eq
+		var cmp: BinarySearchTreeComparisonResult = .eq
 
 		while node != nil {
 			cmp = compare(lhs: element, rhs: node!.element)
@@ -102,8 +102,8 @@ public extension BST {
 	}
 }
 
-public extension BSTComparable where Self: Comparable {
-	static func <=> (lhs: Self, rhs: Self) -> ComparisonResult {
+public extension BinarySearchTreeComparable where Self: Comparable {
+	static func <=> (lhs: Self, rhs: Self) -> BinarySearchTreeComparisonResult {
 		if lhs < rhs {
 			return .lt
 		} else if lhs > rhs {
@@ -113,19 +113,19 @@ public extension BSTComparable where Self: Comparable {
 	}
 }
 
-extension Int: BSTComparable {}
-extension Int8: BSTComparable {}
-extension Int16: BSTComparable {}
-extension Int32: BSTComparable {}
-extension Int64: BSTComparable {}
-extension UInt: BSTComparable {}
-extension UInt8: BSTComparable {}
-extension UInt16: BSTComparable {}
-extension UInt32: BSTComparable {}
-extension UInt64: BSTComparable {}
+extension Int: BinarySearchTreeComparable {}
+extension Int8: BinarySearchTreeComparable {}
+extension Int16: BinarySearchTreeComparable {}
+extension Int32: BinarySearchTreeComparable {}
+extension Int64: BinarySearchTreeComparable {}
+extension UInt: BinarySearchTreeComparable {}
+extension UInt8: BinarySearchTreeComparable {}
+extension UInt16: BinarySearchTreeComparable {}
+extension UInt32: BinarySearchTreeComparable {}
+extension UInt64: BinarySearchTreeComparable {}
 
-extension Float: BSTComparable {
-	public static func <=> (lhs: Self, rhs: Self) -> ComparisonResult {
+extension Float: BinarySearchTreeComparable {
+	public static func <=> (lhs: Self, rhs: Self) -> BinarySearchTreeComparisonResult {
 		if lhs < rhs {
 			return .lt
 		} else if lhs > rhs {
@@ -135,8 +135,8 @@ extension Float: BSTComparable {
 	}
 }
 
-extension Double: BSTComparable {
-	public static func <=> (lhs: Self, rhs: Self) -> ComparisonResult {
+extension Double: BinarySearchTreeComparable {
+	public static func <=> (lhs: Self, rhs: Self) -> BinarySearchTreeComparisonResult {
 		if lhs < rhs {
 			return .lt
 		} else if lhs > rhs {
@@ -146,8 +146,8 @@ extension Double: BSTComparable {
 	}
 }
 
-extension BST: CustomDebugStringConvertible {
+extension BinarySearchTree: CustomDebugStringConvertible {
 	public var debugDescription: String {
-		return "<\(Unmanaged.passUnretained(self).toOpaque())> bst size: \(size())"
+		return "\(type(of: self)) <\(Unmanaged.passUnretained(self).toOpaque())> size: \(size())"
 	}
 }
