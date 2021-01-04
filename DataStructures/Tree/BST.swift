@@ -9,13 +9,20 @@ import Foundation
 
 infix operator <=>: DefaultPrecedence
 public protocol BSTComparable {
-	static func <=> (lhs: Self, rhs: Self) -> Int
+	static func <=> (lhs: Self, rhs: Self) -> ComparisonResult
 }
 
-public class BST<Element> where Element: BSTComparable {
-	typealias BSTComparator = (Element, Element) -> Int
+public enum ComparisonResult {
+	case lt // 小于
+	case gt // 大于
+	case eq // 等于
+}
 
-	private class Node<Element> {
+public class BST<E>: Tree where E: BSTComparable {
+	public typealias Element = E
+	public typealias BSTComparator = (Element, Element) -> ComparisonResult
+
+	class Node<Element> {
 		var element: Element!
 		var left: Node<Element>?
 		var right: Node<Element>?
@@ -27,17 +34,16 @@ public class BST<Element> where Element: BSTComparable {
 		}
 	}
 
-	public private(set) var size: Int = 0
-
-	private var root: Node<Element>?
-	private let comparator: BSTComparator?
+	var _size: Int = 0
+	var root: Node<Element>?
+	let comparator: BSTComparator?
 	init(comparator: BSTComparator? = nil) {
 		self.comparator = comparator
 	}
 }
 
 private extension BST {
-	func compare(lhs: Element, rhs: Element) -> Int {
+	func compare(lhs: Element, rhs: Element) -> ComparisonResult {
 		guard let comparator = comparator else {
 			return lhs <=> rhs
 		}
@@ -46,50 +52,60 @@ private extension BST {
 }
 
 public extension BST {
+	func size() -> Int {
+		return _size
+	}
+
 	func empty() -> Bool {
-		return size == 0
+		return _size == 0
 	}
 
 	func add(element: Element) {
 		guard let root = root else {
 			self.root = Node(element: element, parent: nil)
-			size = 1
+			_size = 1
 			return
 		}
 
 		var node: Node<Element>? = root
 		var parent: Node<Element>? = root
-		var cmp = 0
+		var cmp: ComparisonResult = .eq
 
 		while node != nil {
 			cmp = compare(lhs: element, rhs: node!.element)
 			parent = node
-			if cmp < 0 {
+			if cmp == .lt {
 				node = node?.left
-			} else if cmp > 0 {
+			} else if cmp == .gt {
 				node = node?.right
 			} else {
 				node?.element = element
 				return
 			}
 		}
-		if cmp < 0 {
+		if cmp == .lt {
 			parent?.left = Node(element: element, parent: parent)
 		} else {
 			parent?.right = Node(element: element, parent: parent)
 		}
-		size += 1
+		_size += 1
+	}
+
+	func remove(element: E) {}
+
+	func contains(element: E) -> Bool {
+		fatalError("暂未实现")
 	}
 }
 
-extension BSTComparable where Self: Comparable {
-	public static func <=> (lhs: Self, rhs: Self) -> Int {
+public extension BSTComparable where Self: Comparable {
+	static func <=> (lhs: Self, rhs: Self) -> ComparisonResult {
 		if lhs < rhs {
-			return -1
+			return .lt
 		} else if lhs > rhs {
-			return 1
+			return .gt
 		}
-		return 0
+		return .eq
 	}
 }
 
@@ -98,7 +114,6 @@ extension Int8: BSTComparable {}
 extension Int16: BSTComparable {}
 extension Int32: BSTComparable {}
 extension Int64: BSTComparable {}
-
 extension UInt: BSTComparable {}
 extension UInt8: BSTComparable {}
 extension UInt16: BSTComparable {}
@@ -106,29 +121,29 @@ extension UInt32: BSTComparable {}
 extension UInt64: BSTComparable {}
 
 extension Float: BSTComparable {
-	public static func <=> (lhs: Self, rhs: Self) -> Int {
+	public static func <=> (lhs: Self, rhs: Self) -> ComparisonResult {
 		if lhs < rhs {
-			return -1
+			return .lt
 		} else if lhs > rhs {
-			return 1
+			return .gt
 		}
-		return 0
+		return .eq
 	}
 }
 
 extension Double: BSTComparable {
-	public static func <=> (lhs: Self, rhs: Self) -> Int {
+	public static func <=> (lhs: Self, rhs: Self) -> ComparisonResult {
 		if lhs < rhs {
-			return -1
+			return .lt
 		} else if lhs > rhs {
-			return 1
+			return .gt
 		}
-		return 0
+		return .eq
 	}
 }
 
 extension BST: CustomDebugStringConvertible {
 	public var debugDescription: String {
-		return "<\(Unmanaged.passUnretained(self).toOpaque())> bst size: \(size)"
+		return "<\(Unmanaged.passUnretained(self).toOpaque())> bst size: \(size())"
 	}
 }
