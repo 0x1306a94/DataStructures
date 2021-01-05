@@ -15,6 +15,9 @@ array.forEach { bst.add(element: $0) }
 //set.forEach { bst.add(element: $0) }
 
 print(bst)
+
+//print(bst.predecessor(node: bst._root)?.element)
+//print(bst.successor(node: bst._root)?.element)
 let str = bst.generateDot()
 print(str)
 print(array)
