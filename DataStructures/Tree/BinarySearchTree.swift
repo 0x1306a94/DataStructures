@@ -112,12 +112,17 @@ public class BinarySearchTree<Element>: Tree<Element> where Element: BinarySearc
 			if leaf, !node.isLeaf {
 				return false
 			}
-			if node.hasTowChildren {
-				queue.append(node.left!)
-				queue.append(node.right!)
-			} else if node.left == nil, node.right != nil {
+
+			if let left = node.left {
+				queue.append(left)
+			} else if node.right != nil {
+				// node.left == nil && node.right != nil
 				return false
-			} else { // 后面遍历的节点必须都是叶子节点
+			}
+
+			if let right = node.right {
+				queue.append(right)
+			} else {
 				leaf = true
 			}
 		}

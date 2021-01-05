@@ -12,6 +12,7 @@ let bst = BinarySearchTree<Int>()
 let set = Set((0 ..< 30).map { _ in Int(arc4random_uniform(128) + 1) * 2 })
 let array = [7, 4, 9, 2, 5]
 array.forEach { bst.add(element: $0) }
+//set.forEach { bst.add(element: $0) }
 
 print(bst)
 let str = bst.generateDot()
