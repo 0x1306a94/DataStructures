@@ -8,6 +8,8 @@
 import Foundation
 
 internal extension BinarySearchTree {
+	/// 生成 Graphviz dot 规则, 可通过 https://dreampuf.github.io/GraphvizOnline 在线预览
+	/// - Returns: Graphviz dot 规则文本
 	func generateDot() -> String {
 		guard let root = _root else { return "" }
 		var dotArray: [String] = [
@@ -64,7 +66,7 @@ internal extension BinarySearchTree {
 					rightDistance += 1
 				}
 
-				// 找到root节点的root.Right往下最左边的节点
+				// 找到root节点的root.right往下最左边的节点
 				if rightDistance <= distance {
 					target = rightMin.element
 					distance = rightDistance
@@ -75,7 +77,7 @@ internal extension BinarySearchTree {
 					out.append("\t\"\(rightVal)\" [group=\"\(rightVal)\", label=\"\(rightVal)\"]")
 				}
 
-				// 生成root指向root.Right的关系
+				// 生成root指向root.right的关系
 				out.append("\t\"\(rootVal)\" -> \"\(rightVal)\"")
 
 				printNode(root: root.right!, out: &out)
