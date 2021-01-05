@@ -27,49 +27,25 @@ public enum BinarySearchTreeComparisonResult {
 }
 
 /// 二叉搜索树
-public class BinarySearchTree<E>: Tree where E: BinarySearchTreeComparable {
-	public typealias Element = E
+public class BinarySearchTree<Element>: Tree<Element> where Element: BinarySearchTreeComparable {
 	public typealias BinarySearchTreeComparator = (Element, Element) -> BinarySearchTreeComparisonResult
 
-	private class Node<Element> {
-		var element: Element!
-		var left: Node<Element>?
-		var right: Node<Element>?
-		var parent: Node<Element>?
-
-		init(element: Element, parent: Node<Element>?) {
-			self.element = element
-			self.parent = parent
-		}
-	}
-
-	private var _size: Int = 0
-	private var root: Node<Element>?
 	private let comparator: BinarySearchTreeComparator?
 	init(comparator: BinarySearchTreeComparator? = nil) {
 		self.comparator = comparator
 	}
-}
 
-private extension BinarySearchTree {
-	func compare(lhs: Element, rhs: Element) -> BinarySearchTreeComparisonResult {
-		guard let comparator = comparator else { return lhs <=> rhs }
-		return comparator(lhs, rhs)
-	}
-}
-
-public extension BinarySearchTree {
-	func size() -> Int {
+	override func size() -> Int {
 		return _size
 	}
 
-	func empty() -> Bool {
+	override func empty() -> Bool {
 		return _size == 0
 	}
 
-	func add(element: Element) {
-		guard let root = root else {
-			self.root = Node(element: element, parent: nil)
+	override func add(element: Element) {
+		guard let root = _root else {
+			_root = Node(element: element, parent: nil)
 			_size = 1
 			return
 		}
@@ -95,10 +71,17 @@ public extension BinarySearchTree {
 		_size += 1
 	}
 
-	func remove(element: E) {}
+	override func remove(element: Element) {}
 
-	func contains(element: E) -> Bool {
+	override func contains(element: Element) -> Bool {
 		fatalError("暂未实现")
+	}
+}
+
+private extension BinarySearchTree {
+	func compare(lhs: Element, rhs: Element) -> BinarySearchTreeComparisonResult {
+		guard let comparator = comparator else { return lhs <=> rhs }
+		return comparator(lhs, rhs)
 	}
 }
 
