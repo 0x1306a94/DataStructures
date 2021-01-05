@@ -7,13 +7,19 @@
 
 import Foundation
 
-let bst = BinarySearchTree<Float>()
+let bst = BinarySearchTree<Int>()
 
-let array: [Float] = [7, 4, 9, 2, 5, 8, 11, 1, 3, 2.5, 10, 12]
+let set = Set((0 ..< 30).map { _ in Int(arc4random_uniform(128) + 1) * 2 })
+let array = [7, 4, 9, 2, 5]
 array.forEach { bst.add(element: $0) }
 
 print(bst)
-
 let str = bst.generateDot()
-
 print(str)
+print(array)
+var levelArray: [Int] = []
+bst.levelOrder { levelArray.append($0) }
+print(levelArray)
+
+print("height:", bst.height())
+print("isComplete:", bst.isComplete())

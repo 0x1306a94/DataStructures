@@ -13,6 +13,14 @@ public class Tree<Element> {
 		var right: Node<Element>?
 		var parent: Node<Element>?
 
+		var isLeaf: Bool {
+			return left == nil && right == nil
+		}
+
+		var hasTowChildren: Bool {
+			return left != nil && right != nil
+		}
+
 		init(element: Element, parent: Node<Element>?) {
 			self.element = element
 			self.parent = parent
@@ -43,6 +51,14 @@ public class Tree<Element> {
 	/// 是否包含某个元素
 	/// - Parameter element: 节点元素
 	func contains(element: Element) -> Bool {
+		return false
+	}
+
+	func height() -> Int {
+		return 0
+	}
+
+	func isComplete() -> Bool {
 		return false
 	}
 }

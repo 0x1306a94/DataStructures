@@ -76,12 +76,79 @@ public class BinarySearchTree<Element>: Tree<Element> where Element: BinarySearc
 	override func contains(element: Element) -> Bool {
 		fatalError("暂未实现")
 	}
+
+	override func height() -> Int {
+		guard let root = _root else { return 0 }
+		var queue: [Node<Element>] = [root]
+		var height = 0
+		var levelSize = 1
+
+		while !queue.isEmpty {
+			let node = queue.removeFirst()
+			levelSize -= 1
+			if let left = node.left {
+				queue.append(left)
+			}
+
+			if let right = node.right {
+				queue.append(right)
+			}
+
+			if levelSize == 0 {
+				levelSize = queue.count
+				height += 1
+			}
+		}
+		return height
+	}
+
+	override func isComplete() -> Bool {
+		guard let root = _root else { return false }
+		var queue: [Node<Element>] = [root]
+
+		var leaf = false
+		while !queue.isEmpty {
+			let node = queue.removeFirst()
+			if leaf, !node.isLeaf {
+				return false
+			}
+			if node.hasTowChildren {
+				queue.append(node.left!)
+				queue.append(node.right!)
+			} else if node.left == nil, node.right != nil {
+				return false
+			} else { // 后面遍历的节点必须都是叶子节点
+				leaf = true
+			}
+		}
+
+		return true
+	}
 }
 
 private extension BinarySearchTree {
 	func compare(lhs: Element, rhs: Element) -> BinarySearchTreeComparisonResult {
 		guard let comparator = comparator else { return lhs <=> rhs }
 		return comparator(lhs, rhs)
+	}
+}
+
+public extension BinarySearchTree {
+	func levelOrder(_ visitor: (Element) -> Void) {
+		guard let root = _root else { return }
+		var queue: [Node<Element>] = [root]
+
+		while !queue.isEmpty {
+			let node = queue.removeFirst()
+			visitor(node.element!)
+			if let left = node.left {
+				queue.append(left)
+			}
+
+			if let right = node.right {
+				queue.append(right)
+			}
+		}
 	}
 }
 
