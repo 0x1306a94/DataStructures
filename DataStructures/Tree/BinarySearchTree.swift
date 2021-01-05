@@ -27,7 +27,7 @@ public enum BinarySearchTreeComparisonResult {
 }
 
 /// 二叉搜索树
-public class BinarySearchTree<Element>: Tree<Element> where Element: BinarySearchTreeComparable {
+public class BinarySearchTree<Element>: BinaryTree<Element> where Element: BinarySearchTreeComparable {
 	public typealias BinarySearchTreeComparator = (Element, Element) -> BinarySearchTreeComparisonResult
 
 	private let comparator: BinarySearchTreeComparator?
@@ -35,15 +35,9 @@ public class BinarySearchTree<Element>: Tree<Element> where Element: BinarySearc
 		self.comparator = comparator
 	}
 
-	override func size() -> Int {
-		return _size
-	}
-
-	override func empty() -> Bool {
-		return _size == 0
-	}
-
-	override func add(element: Element) {
+	/// 添加节点
+	/// - Parameter element: 节点元素
+	func add(element: Element) {
 		guard let root = _root else {
 			_root = Node(element: element, parent: nil)
 			_size = 1
@@ -71,63 +65,65 @@ public class BinarySearchTree<Element>: Tree<Element> where Element: BinarySearc
 		_size += 1
 	}
 
-	override func remove(element: Element) {}
-
-	override func contains(element: Element) -> Bool {
-		fatalError("暂未实现")
+	/// 移除节点
+	/// - Parameter element: 节点元素
+	func remove(element: Element) {
+		guard let node = node(at: element) else { return }
+		remove(node: node)
 	}
 
-	override func height() -> Int {
-		guard let root = _root else { return 0 }
-		var queue: [Node<Element>] = [root]
-		var height = 0
-		var levelSize = 1
-
-		while !queue.isEmpty {
-			let node = queue.removeFirst()
-			levelSize -= 1
-			if let left = node.left {
-				queue.append(left)
-			}
-
-			if let right = node.right {
-				queue.append(right)
-			}
-
-			if levelSize == 0 {
-				levelSize = queue.count
-				height += 1
-			}
-		}
-		return height
-	}
-
-	override func isComplete() -> Bool {
-		guard let root = _root else { return false }
-		var queue: [Node<Element>] = [root]
-
-		var leaf = false
-		while !queue.isEmpty {
-			let node = queue.removeFirst()
-			if leaf, !node.isLeaf {
-				return false
-			}
-
-			if let left = node.left {
-				queue.append(left)
-			} else if node.right != nil {
-				// node.left == nil && node.right != nil
-				return false
-			}
-
-			if let right = node.right {
-				queue.append(right)
-			} else {
-				leaf = true
-			}
-		}
-
+	/// 是否包含某个元素
+	/// - Parameter element: 节点元素
+	func contains(element: Element) -> Bool {
+		guard let _ = node(at: element) else { return false }
 		return true
+	}
+
+	internal func remove(node: BinaryTree<Element>.Node<Element>) {
+		_size -= 1
+		var n = node
+		if node.hasTowChildren { // 度为2的节点
+			// 用后继节点的值覆盖node 的值
+			let s = successor(node: node)!
+			node.element = s.element
+			// 删除后继节点
+			n = s
+		}
+
+		// 删除node节点, node的度必然是1或者0
+		let replacement = n.left != nil ? n.left : n.right
+		if replacement != nil { // node 是度为 1 的节点
+			// 更新 parent
+			replacement?.parent = n.parent
+			// 更新 parent left 或者 right 指向
+			if n.parent == nil { // node 是度为1的节点并且是根节点
+				_root = replacement
+			} else if n == n.parent?.left {
+				n.parent?.left = replacement
+			} else if n == n.parent?.right {
+				n.parent?.right = replacement
+			}
+		} else if n.parent == nil { // 叶子节点, 并且是根节点
+			_root = nil
+		} else { // 叶子节点, 但不是根节点
+			if n == n.parent?.left {
+				n.parent?.left = nil
+			} else {
+				n.parent?.right = nil
+			}
+		}
+	}
+
+	internal func node(at element: Element) -> BinaryTree<Element>.Node<Element>? {
+		var node = _root
+		while node != nil {
+			switch compare(lhs: element, rhs: node!.element) {
+			case .lt: node = node!.left
+			case .gt: node = node!.right
+			default: return node
+			}
+		}
+		return nil
 	}
 }
 
@@ -135,25 +131,6 @@ private extension BinarySearchTree {
 	func compare(lhs: Element, rhs: Element) -> BinarySearchTreeComparisonResult {
 		guard let comparator = comparator else { return lhs <=> rhs }
 		return comparator(lhs, rhs)
-	}
-}
-
-public extension BinarySearchTree {
-	func levelOrder(_ visitor: (Element) -> Void) {
-		guard let root = _root else { return }
-		var queue: [Node<Element>] = [root]
-
-		while !queue.isEmpty {
-			let node = queue.removeFirst()
-			visitor(node.element!)
-			if let left = node.left {
-				queue.append(left)
-			}
-
-			if let right = node.right {
-				queue.append(right)
-			}
-		}
 	}
 }
 
