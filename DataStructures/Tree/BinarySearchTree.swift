@@ -27,7 +27,7 @@ public enum BinarySearchTreeComparisonResult {
 }
 
 /// 二叉搜索树
-public class BinarySearchTree<Element>: BinaryTree<Element> where Element: BinarySearchTreeComparable {
+public class BinarySearchTree<Element>: BinaryTree<Element> where Element: BinarySearchTreeComparable & Equatable {
 	public typealias BinarySearchTreeComparator = (Element, Element) -> BinarySearchTreeComparisonResult
 
 	private let comparator: BinarySearchTreeComparator?

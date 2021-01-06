@@ -8,12 +8,16 @@
 import Foundation
 
 /// 树
-public class BinaryTree<Element> {
-	internal class Node<Element>: NSObject {
+public class BinaryTree<Element> where Element: Equatable {
+	internal class Node<Element>: Equatable where Element: Equatable {
+		static func == (lhs: Node<Element>, rhs:  Node<Element>) -> Bool {
+			return lhs.element == rhs.element
+		}
+
 		var element: Element!
 		var left: Node<Element>?
 		var right: Node<Element>?
-		weak var parent: Node<Element>?
+		var parent: Node<Element>?
 
 		var isLeaf: Bool {
 			return left == nil && right == nil
@@ -26,6 +30,10 @@ public class BinaryTree<Element> {
 		init(element: Element, parent: Node<Element>?) {
 			self.element = element
 			self.parent = parent
+		}
+
+		deinit {
+			print("\(type(of: self)) deinit -> element: \(element!)")
 		}
 	}
 
@@ -175,7 +183,7 @@ public class BinaryTree<Element> {
 		guard var n = node else { return node }
 
 		var p = n.right
-		// 前驱节点在左子树当中 node.right.left.left....
+		// 后继节点在右子树当中 node.right.left.left....
 		if p != nil {
 			while p!.left != nil {
 				p = p!.left!
@@ -198,8 +206,7 @@ extension BinaryTree {
 	// MARK: - 翻转二叉树
 
 	func invertTree() {
-		guard let root = _root else { return }
-		invertTree(node: root)
+		invertTree(node: _root)
 	}
 
 	func invertTree(node: Node<Element>?) {
