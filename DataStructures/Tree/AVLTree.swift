@@ -66,6 +66,22 @@ internal extension AVLTree {
 
 	func rebalance(grand: AVLTreeNode<Element>) {
 		guard let parent = grand.tallerChild(), let node = parent.tallerChild() else { return }
+//		if parent.isLeftChild { // L
+//			if node.isLeftChild { // LL
+//				rotateRight(grand: grand)
+//			} else { // LR
+//				rotateLeft(grand: parent)
+//				rotateRight(grand: grand)
+//			}
+//		} else { // R
+//			if node.isLeftChild { // RL
+//				rotateRight(grand: parent)
+//				rotateLeft(grand: grand)
+//			} else { // RR
+//				rotateLeft(grand: grand)
+//			}
+//		}
+
 		if parent.isLeftChild { // L
 			if node.isLeftChild { // LL
 				rotate(r: grand, b: node, c: node.right as? AVLTreeNode<Element>, d: parent, e: parent.right as? AVLTreeNode<Element>, f: grand)
@@ -128,8 +144,8 @@ internal extension AVLTree {
 	func rotateRight(grand: AVLTreeNode<Element>) {
 		let parent = grand.left
 		let child = parent?.right
-		grand.right = child
-		parent?.left = grand
+		grand.left = child
+		parent?.right = grand
 
 		afterRotate(grand: grand, parent: parent as? AVLTreeNode<Element>, child: child as? AVLTreeNode<Element>)
 	}
