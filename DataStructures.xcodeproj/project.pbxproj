@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		3C61217125A3037A007F39A3 /* BinaryTree.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C61217025A3037A007F39A3 /* BinaryTree.swift */; };
 		3C61217525A317BA007F39A3 /* GraphvizGenerate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C61217425A317BA007F39A3 /* GraphvizGenerate.swift */; };
+		3C6122FC25A55D22007F39A3 /* AVLTree.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C6122FB25A55D22007F39A3 /* AVLTree.swift */; };
 		3C6F5252251B2940004AB5BA /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C6F5251251B2940004AB5BA /* main.swift */; };
 		3C6F525D251B2E35004AB5BA /* BinarySearchTree.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C6F525C251B2E35004AB5BA /* BinarySearchTree.swift */; };
 /* End PBXBuildFile section */
@@ -28,6 +29,7 @@
 /* Begin PBXFileReference section */
 		3C61217025A3037A007F39A3 /* BinaryTree.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BinaryTree.swift; sourceTree = "<group>"; };
 		3C61217425A317BA007F39A3 /* GraphvizGenerate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GraphvizGenerate.swift; sourceTree = "<group>"; };
+		3C6122FB25A55D22007F39A3 /* AVLTree.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AVLTree.swift; sourceTree = "<group>"; };
 		3C6F524E251B2940004AB5BA /* DataStructures */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = DataStructures; sourceTree = BUILT_PRODUCTS_DIR; };
 		3C6F5251251B2940004AB5BA /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
 		3C6F525C251B2E35004AB5BA /* BinarySearchTree.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BinarySearchTree.swift; sourceTree = "<group>"; };
@@ -72,8 +74,9 @@
 		3C6F525B251B2E0C004AB5BA /* Tree */ = {
 			isa = PBXGroup;
 			children = (
-				3C6F525C251B2E35004AB5BA /* BinarySearchTree.swift */,
 				3C61217025A3037A007F39A3 /* BinaryTree.swift */,
+				3C6F525C251B2E35004AB5BA /* BinarySearchTree.swift */,
+				3C6122FB25A55D22007F39A3 /* AVLTree.swift */,
 				3C61217425A317BA007F39A3 /* GraphvizGenerate.swift */,
 			);
 			path = Tree;
@@ -140,6 +143,7 @@
 				3C6F5252251B2940004AB5BA /* main.swift in Sources */,
 				3C6F525D251B2E35004AB5BA /* BinarySearchTree.swift in Sources */,
 				3C61217525A317BA007F39A3 /* GraphvizGenerate.swift in Sources */,
+				3C6122FC25A55D22007F39A3 /* AVLTree.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

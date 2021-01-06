@@ -8,7 +8,7 @@
 import Foundation
 
 infix operator <=>: DefaultPrecedence
-public protocol BinarySearchTreeComparable {
+public protocol BinarySearchTreeComparable: Equatable {
 	/// 节点元素比较
 	/// - Parameters:
 	///   - lhs: 左节点元素
@@ -27,25 +27,26 @@ public enum BinarySearchTreeComparisonResult {
 }
 
 /// 二叉搜索树
-public class BinarySearchTree<Element>: BinaryTree<Element> where Element: BinarySearchTreeComparable & Equatable {
+public class BinarySearchTree<Element: BinarySearchTreeComparable>: BinaryTree<Element> {
 	public typealias BinarySearchTreeComparator = (Element, Element) -> BinarySearchTreeComparisonResult
 
-	private let comparator: BinarySearchTreeComparator?
-	init(comparator: BinarySearchTreeComparator? = nil) {
+	internal let comparator: BinarySearchTreeComparator?
+	public init(comparator: BinarySearchTreeComparator? = nil) {
 		self.comparator = comparator
 	}
 
 	/// 添加节点
 	/// - Parameter element: 节点元素
-	func add(element: Element) {
+	public func add(element: Element) {
 		guard let root = _root else {
-			_root = Node(element: element, parent: nil)
+			_root = createNode(element: element, parent: nil)
 			_size = 1
+			afterAdd(node: _root!)
 			return
 		}
 
-		var node: Node<Element>? = root
-		var parent: Node<Element>? = root
+		var node: Node? = root
+		var parent: Node? = root
 		var cmp: BinarySearchTreeComparisonResult = .eq
 
 		while node != nil {
@@ -57,29 +58,40 @@ public class BinarySearchTree<Element>: BinaryTree<Element> where Element: Binar
 			default: node?.element = element; return
 			}
 		}
+		let addNode = createNode(element: element, parent: parent)
 		if cmp == .lt {
-			parent?.left = Node(element: element, parent: parent)
+			parent?.left = addNode
 		} else {
-			parent?.right = Node(element: element, parent: parent)
+			parent?.right = addNode
 		}
 		_size += 1
+
+		afterAdd(node: addNode)
 	}
 
 	/// 移除节点
 	/// - Parameter element: 节点元素
-	func remove(element: Element) {
+	public func remove(element: Element) {
 		guard let node = node(at: element) else { return }
 		remove(node: node)
 	}
 
 	/// 是否包含某个元素
 	/// - Parameter element: 节点元素
-	func contains(element: Element) -> Bool {
+	public func contains(element: Element) -> Bool {
 		guard let _ = node(at: element) else { return false }
 		return true
 	}
 
-	internal func remove(node: BinaryTree<Element>.Node<Element>) {
+	internal func createNode(element: Element, parent: Node?) -> Node {
+		return Node(element: element, parent: parent)
+	}
+
+	internal func afterAdd(node: Node) {}
+
+	internal func afterRemove(node: Node) {}
+
+	internal func remove(node: Node) {
 		_size -= 1
 		var n = node
 		if node.hasTowChildren { // 度为2的节点
@@ -114,7 +126,7 @@ public class BinarySearchTree<Element>: BinaryTree<Element> where Element: Binar
 		}
 	}
 
-	internal func node(at element: Element) -> BinaryTree<Element>.Node<Element>? {
+	internal func node(at element: Element) -> Node? {
 		var node = _root
 		while node != nil {
 			switch compare(lhs: element, rhs: node!.element) {

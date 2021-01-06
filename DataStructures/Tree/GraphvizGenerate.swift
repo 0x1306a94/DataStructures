@@ -24,7 +24,7 @@ internal extension BinarySearchTree {
 			dotArray.append("\t\"\(val)\" [group=\"\(val)\", label=\"\(val)\"]")
 		}
 
-		func printNode(root: Node<Element>, out: inout [String]) {
+		func printNode(root: Node, out: inout [String]) {
 			var target: Element?
 			var distance = 0
 
