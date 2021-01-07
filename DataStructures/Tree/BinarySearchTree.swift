@@ -115,14 +115,18 @@ public class BinarySearchTree<Element: BinarySearchTreeComparable>: BinaryTree<E
 			} else if n == n.parent?.right {
 				n.parent?.right = replacement
 			}
+			afterRemove(node: node)
 		} else if n.parent == nil { // 叶子节点, 并且是根节点
 			_root = nil
+			afterRemove(node: node)
 		} else { // 叶子节点, 但不是根节点
 			if n == n.parent?.left {
 				n.parent?.left = nil
 			} else {
 				n.parent?.right = nil
 			}
+
+			afterRemove(node: node)
 		}
 	}
 

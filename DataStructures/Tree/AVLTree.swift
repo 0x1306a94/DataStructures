@@ -44,15 +44,29 @@ public class AVLTree<Element: BinarySearchTreeComparable>: BinarySearchTree<Elem
 		while _node.parent != nil {
 			_node = _node.parent as! AVLTreeNode<Element>
 			if isBlanced(node: _node) {
+				// 更新高度
 				updateHeight(node: _node)
 			} else {
+				// 回复平衡
 				rebalance(grand: _node)
 				break
 			}
 		}
 	}
 
-	override internal func afterRemove(node: Node) {}
+	override internal func afterRemove(node: Node) {
+		var _node = node as! AVLTreeNode<Element>
+		while _node.parent != nil {
+			_node = _node.parent as! AVLTreeNode<Element>
+			if isBlanced(node: _node) {
+				// 更新高度
+				updateHeight(node: _node)
+			} else {
+				// 回复平衡
+				rebalance(grand: _node)
+			}
+		}
+	}
 }
 
 internal extension AVLTree {
@@ -84,20 +98,45 @@ internal extension AVLTree {
 
 		if parent.isLeftChild { // L
 			if node.isLeftChild { // LL
-				rotate(r: grand, b: node, c: node.right as? AVLTreeNode<Element>, d: parent, e: parent.right as? AVLTreeNode<Element>, f: grand)
+				rotate(
+					r: grand,
+					a: node.left as? AVLTreeNode<Element>, b: node, c: node.right as? AVLTreeNode<Element>,
+					d: parent,
+					e: parent.right as? AVLTreeNode<Element>, f: grand, g: grand.right as? AVLTreeNode<Element>
+				)
 			} else { // LR
-				rotate(r: grand, b: parent, c: node.left as? AVLTreeNode<Element>, d: node, e: node.right as? AVLTreeNode<Element>, f: grand)
+				rotate(
+					r: grand,
+					a: parent.left as? AVLTreeNode<Element>, b: parent, c: node.left as? AVLTreeNode<Element>,
+					d: node,
+					e: node.right as? AVLTreeNode<Element>, f: grand, g: grand.right as? AVLTreeNode<Element>
+				)
 			}
 		} else { // R
 			if node.isLeftChild { // RL
-				rotate(r: grand, b: grand, c: node.left as? AVLTreeNode<Element>, d: node, e: node.right as? AVLTreeNode<Element>, f: parent)
+				rotate(
+					r: grand,
+					a: grand.left as? AVLTreeNode<Element>, b: grand, c: node.left as? AVLTreeNode<Element>,
+					d: node,
+					e: node.right as? AVLTreeNode<Element>, f: parent, g: parent.right as? AVLTreeNode<Element>
+				)
 			} else { // RR
-				rotate(r: grand, b: grand, c: parent.left as? AVLTreeNode<Element>, d: parent, e: node.left as? AVLTreeNode<Element>, f: node)
+				rotate(
+					r: grand,
+					a: grand.left as? AVLTreeNode<Element>, b: grand, c: parent.left as? AVLTreeNode<Element>,
+					d: parent,
+					e: node.left as? AVLTreeNode<Element>, f: node, g: node.right as? AVLTreeNode<Element>
+				)
 			}
 		}
 	}
 
-	func rotate(r: AVLTreeNode<Element>?, b: AVLTreeNode<Element>?, c: AVLTreeNode<Element>?, d: AVLTreeNode<Element>?, e: AVLTreeNode<Element>?, f: AVLTreeNode<Element>?) {
+	func rotate(
+		r: AVLTreeNode<Element>?, // 子树的根节点
+		a: AVLTreeNode<Element>?, b: AVLTreeNode<Element>?, c: AVLTreeNode<Element>?,
+		d: AVLTreeNode<Element>?,
+		e: AVLTreeNode<Element>?, f: AVLTreeNode<Element>?, g: AVLTreeNode<Element>?
+	) {
 		// 让d成为这棵子树的根节点
 		d?.parent = r?.parent
 		if r?.isLeftChild ?? false {
@@ -108,7 +147,12 @@ internal extension AVLTree {
 			_root = d
 		}
 
-		// b c
+		// a b c
+		b?.left = a
+		if a != nil {
+			a?.parent = b
+		}
+
 		b?.right = c
 		if c != nil {
 			c?.parent = b
@@ -116,10 +160,15 @@ internal extension AVLTree {
 
 		b?.updateHeight()
 
-		// e f
+		// e f g
 		f?.left = e
 		if e != nil {
 			e?.parent = f
+		}
+
+		f?.right = g
+		if g != nil {
+			f?.parent = f
 		}
 
 		f?.updateHeight()

@@ -38,9 +38,9 @@ internal class BinaryTreeNode<Element: Equatable>: Equatable {
 		self.parent = parent
 	}
 
-	deinit {
-		print("\(type(of: self)) deinit -> element: \(element!)")
-	}
+//	deinit {
+//		print("\(type(of: self)) deinit -> element: \(element!)")
+//	}
 }
 
 /// 树
