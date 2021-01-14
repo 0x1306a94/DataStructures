@@ -11,7 +11,7 @@ internal class BinaryTreeNode<Element> {
     var element: Element!
     var left: BinaryTreeNode<Element>?
     var right: BinaryTreeNode<Element>?
-    var parent: BinaryTreeNode<Element>?
+    weak var parent: BinaryTreeNode<Element>?
 
     var isLeaf: Bool {
         return left == nil && right == nil
@@ -34,9 +34,9 @@ internal class BinaryTreeNode<Element> {
         self.parent = parent
     }
 
-    //	deinit {
-    //		print("\(type(of: self)) deinit -> element: \(element!)")
-    //	}
+    deinit {
+        print("\(type(of: self)) deinit -> element: \(element!)")
+    }
 }
 
 /// 树
