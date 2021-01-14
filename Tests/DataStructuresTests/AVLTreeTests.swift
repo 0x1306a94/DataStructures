@@ -10,7 +10,7 @@ import XCTest
 
 final class AVLTreeTests: XCTestCase {
     func testAVLTree() {
-        let avl = AVLTree<Int>()
+        let avl = AVL<Int>()
         let array = [85, 19, 69, 3, 7, 99, 95]
         array.forEach { avl.add(element: $0) }
 

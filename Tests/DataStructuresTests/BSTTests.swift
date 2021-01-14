@@ -10,8 +10,9 @@ import XCTest
 
 final class BSTTests: XCTestCase {
     func testBST() {
-        let bst = BST<Int>()
-        let array = [7, 4, 9, 2, 5, 8, 11]
+        let bst = AVL<Int>()
+        let array: [Int] = [7, 4, 9, 2, 5, 8, 11]
+
         array.forEach { bst.add(element: $0) }
 
         print(bst)

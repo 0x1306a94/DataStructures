@@ -7,11 +7,12 @@
 
 import Foundation
 
-internal class BinaryTreeNode<Element> {
+public class BinaryTreeNode<Element, Extra> {
     var element: Element!
-    var left: BinaryTreeNode<Element>?
-    var right: BinaryTreeNode<Element>?
-    weak var parent: BinaryTreeNode<Element>?
+    var extra: Extra
+    var left: BinaryTreeNode?
+    var right: BinaryTreeNode?
+    weak var parent: BinaryTreeNode?
 
     var isLeaf: Bool {
         return left == nil && right == nil
@@ -29,9 +30,22 @@ internal class BinaryTreeNode<Element> {
         return parent != nil && self === parent?.right
     }
 
-    init(element: Element, parent: BinaryTreeNode<Element>?) {
+    init(element: Element, parent: BinaryTreeNode?, extra: Extra) {
         self.element = element
         self.parent = parent
+        self.extra = extra
+    }
+
+    init(element: Element, parent: BinaryTreeNode?) where Extra == Void {
+        self.element = element
+        self.parent = parent
+        extra = ()
+    }
+
+    init(element: Element, parent: BinaryTreeNode?) where Extra == Int {
+        self.element = element
+        self.parent = parent
+        extra = 1
     }
 
     deinit {
@@ -39,25 +53,31 @@ internal class BinaryTreeNode<Element> {
     }
 }
 
-/// 树
-public class BinaryTree<Element>: CustomDebugStringConvertible {
-    internal typealias Node = BinaryTreeNode<Element>
+/// 二叉搜索树
+public protocol BinaryTree: class {
+    associatedtype NodeElement
+    associatedtype NodeExtra
 
-    internal var _size = 0
-    internal var _root: Node?
+    var _size: Int { get set }
+    var _root: BinaryTreeNode<NodeElement, NodeExtra>? { get set }
+}
 
+public extension BinaryTree {
+    typealias Node = BinaryTreeNode<NodeElement, NodeExtra>
+    typealias Element = NodeElement
     /// 节点总数
-    public func size() -> Int {
+    /// 节点总数
+    func size() -> Int {
         return _size
     }
 
     /// 是否为空
-    public func empty() -> Bool {
+    func empty() -> Bool {
         return _size == 0
     }
 
     /// 清空
-    public func clear() {
+    func clear() {
         _size = 0
         _root = nil
     }
@@ -66,7 +86,7 @@ public class BinaryTree<Element>: CustomDebugStringConvertible {
 
     /// 前序遍历
     /// - Parameter visit: return true 中断遍历
-    public func preorder(_ visit: (Element) -> Bool) {
+    func preorder(_ visit: (Element) -> Bool) {
 //        guard let _ = _root else { return }
 //
 //        var node = _root
@@ -116,7 +136,7 @@ public class BinaryTree<Element>: CustomDebugStringConvertible {
 
     /// 中序遍历
     /// - Parameter visit: return true 中断遍历
-    public func inorder(_ visit: (Element) -> Bool) {
+    func inorder(_ visit: (Element) -> Bool) {
         guard let _ = _root else { return }
 
         var node = _root
@@ -141,7 +161,7 @@ public class BinaryTree<Element>: CustomDebugStringConvertible {
 
     /// 后序遍历
     /// - Parameter visit: return true 中断遍历
-    public func postorder(_ visit: (Element) -> Bool) {
+    func postorder(_ visit: (Element) -> Bool) {
         guard let root = _root else { return }
 
         var stack: [Node] = [root]
@@ -170,7 +190,7 @@ public class BinaryTree<Element>: CustomDebugStringConvertible {
 
     /// 层序遍历
     /// - Parameter visitor: return true 中断遍历
-    public func levelOrder(_ visitor: (Element) -> Bool) {
+    func levelOrder(_ visitor: (Element) -> Bool) {
         guard let root = _root else { return }
         var queue: [Node] = [root]
 
@@ -184,112 +204,6 @@ public class BinaryTree<Element>: CustomDebugStringConvertible {
             }
 
             if let right = node.right {
-                queue.append(right)
-            }
-        }
-    }
-
-    // MARK: - 前驱节点
-
-    internal func predecessor(node: Node?) -> Node? {
-        guard var n = node else { return node }
-
-        var p = n.left
-        // 前驱节点在左子树当中 node.left.right.right....
-        if p != nil {
-            while p!.right != nil {
-                p = p!.right!
-            }
-            return p
-        }
-
-        // 从父节点, 祖父节点中寻找
-        while n.parent != nil, n === n.parent?.left {
-            n = n.parent!
-        }
-
-        // n.parent == nil
-        // n == n.parent.right
-        return n.parent
-    }
-
-    // MARK: - 后继节点
-
-    internal func successor(node: Node?) -> Node? {
-        guard var n = node else { return node }
-
-        var p = n.right
-        // 后继节点在右子树当中 node.right.left.left....
-        if p != nil {
-            while p!.left != nil {
-                p = p!.left!
-            }
-            return p
-        }
-
-        // 从父节点, 祖父节点中寻找
-        while n.parent != nil, n === n.parent?.right {
-            n = n.parent!
-        }
-
-        // n.parent == nil
-        // n == n.parent.left
-        return n.parent
-    }
-
-    public var debugDescription: String {
-        return "\(type(of: self)) <\(Unmanaged.passUnretained(self).toOpaque())>"
-    }
-}
-
-public extension BinaryTree {
-    // MARK: - 翻转二叉树
-
-    func invertTree() {
-        invertTree(node: _root)
-    }
-
-    internal func invertTree(node: Node?) {
-        guard let node = node else { return }
-
-        // 前序递归遍历
-        //		let left = node.left
-        //		node.left = node.right
-        //		node.right = left
-//
-        //		invertTree(node: node.left)
-        //		invertTree(node: node.right)
-
-        // 后序递归遍历
-        //		invertTree(node: node.left)
-        //		invertTree(node: node.right)
-//
-        //		let left = node.left
-        //		node.left = node.right
-        //		node.right = left
-
-        // 中序递归遍历
-        //		invertTree(node: node.left)
-//
-        //		let left = node.left
-        //		node.left = node.right
-        //		node.right = left
-//
-        //		invertTree(node: node.left)
-
-        // 层序遍历
-        var queue = [node]
-        while !queue.isEmpty {
-            let top = queue.removeFirst()
-            let left = top.left
-            top.left = top.right
-            top.right = left
-
-            if let left = top.left {
-                queue.append(left)
-            }
-
-            if let right = top.right {
                 queue.append(right)
             }
         }
@@ -346,5 +260,107 @@ public extension BinaryTree {
         }
 
         return true
+    }
+
+    // MARK: - 翻转二叉树
+
+    func invertTree() {
+        invertTree(node: _root)
+    }
+
+    func invertTree(node: Node?) {
+        guard let node = node else { return }
+
+        // 前序递归遍历
+        //        let left = node.left
+        //        node.left = node.right
+        //        node.right = left
+
+        //        invertTree(node: node.left)
+        //        invertTree(node: node.right)
+
+        // 后序递归遍历
+        //        invertTree(node: node.left)
+        //        invertTree(node: node.right)
+
+        //        let left = node.left
+        //        node.left = node.right
+        //        node.right = left
+
+        // 中序递归遍历
+        //        invertTree(node: node.left)
+
+        //        let left = node.left
+        //        node.left = node.right
+        //        node.right = left
+
+        //        invertTree(node: node.left)
+
+        // 层序遍历
+        var queue = [node]
+        while !queue.isEmpty {
+            let top = queue.removeFirst()
+            let left = top.left
+            top.left = top.right
+            top.right = left
+
+            if let left = top.left {
+                queue.append(left)
+            }
+
+            if let right = top.right {
+                queue.append(right)
+            }
+        }
+    }
+}
+
+internal extension BinaryTree {
+    // MARK: - 前驱节点
+
+    func predecessor(node: Node?) -> Node? {
+        guard var n = node else { return node }
+
+        var p = n.left
+        // 前驱节点在左子树当中 node.left.right.right....
+        if p != nil {
+            while p!.right != nil {
+                p = p!.right!
+            }
+            return p
+        }
+
+        // 从父节点, 祖父节点中寻找
+        while n.parent != nil, n === n.parent?.left {
+            n = n.parent!
+        }
+
+        // n.parent == nil
+        // n == n.parent.right
+        return n.parent
+    }
+
+    // MARK: - 后继节点
+
+    func successor(node: Node?) -> Node? {
+        guard var n = node else { return node }
+
+        var p = n.right
+        // 后继节点在右子树当中 node.right.left.left....
+        if p != nil {
+            while p!.left != nil {
+                p = p!.left!
+            }
+            return p
+        }
+
+        // 从父节点, 祖父节点中寻找
+        while n.parent != nil, n === n.parent?.right {
+            n = n.parent!
+        }
+
+        // n.parent == nil
+        // n == n.parent.left
+        return n.parent
     }
 }

@@ -11,6 +11,7 @@ let package = Package(
             name: "DataStructures",
             targets: ["DataStructures"]
         ),
+        .executable(name: "Example", targets: ["Example"]),
     ],
     dependencies: [
         // Dependencies declare other packages that this package depends on.
@@ -21,7 +22,13 @@ let package = Package(
         // Targets can depend on other targets in this package, and on products in packages this package depends on.
         .target(
             name: "DataStructures",
-            dependencies: []
+            dependencies: [],
+            path: "Sources/DataStructures"
+        ),
+        .target(
+            name: "Example",
+            dependencies: ["DataStructures"],
+            path: "Sources/Example"
         ),
         .testTarget(
             name: "DataStructuresTests",

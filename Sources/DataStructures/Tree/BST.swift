@@ -26,18 +26,69 @@ public enum BSTComparisonResult {
     case eq // 等于
 }
 
-/// 二叉搜索树
-public class BST<Element>: BinaryTree<Element> where Element: BSTComparable {
-    public typealias BSTComparator = (Element, Element) -> BSTComparisonResult
-
-    internal let comparator: BSTComparator?
-    public init(comparator: BSTComparator? = nil) {
-        self.comparator = comparator
+public extension BSTComparable where Self: Comparable {
+    static func <=> (lhs: Self, rhs: Self) -> BSTComparisonResult {
+        if lhs < rhs {
+            return .lt
+        } else if lhs > rhs {
+            return .gt
+        }
+        return .eq
     }
+}
 
+extension Int: BSTComparable {}
+extension Int8: BSTComparable {}
+extension Int16: BSTComparable {}
+extension Int32: BSTComparable {}
+extension Int64: BSTComparable {}
+extension UInt: BSTComparable {}
+extension UInt8: BSTComparable {}
+extension UInt16: BSTComparable {}
+extension UInt32: BSTComparable {}
+extension UInt64: BSTComparable {}
+
+extension Float: BSTComparable {
+    public static func <=> (lhs: Self, rhs: Self) -> BSTComparisonResult {
+        if lhs < rhs {
+            return .lt
+        } else if lhs > rhs {
+            return .gt
+        }
+        return .eq
+    }
+}
+
+extension Double: BSTComparable {
+    public static func <=> (lhs: Self, rhs: Self) -> BSTComparisonResult {
+        if lhs < rhs {
+            return .lt
+        } else if lhs > rhs {
+            return .gt
+        }
+        return .eq
+    }
+}
+
+public protocol BSTTree: BinaryTree {
+    typealias BSTComparator = (NodeElement, NodeElement) -> BSTComparisonResult
+    var comparator: BSTComparator? { get set }
+    init(comparator: BSTComparator?)
+}
+
+internal extension BSTTree {
+    func compare(lhs: NodeElement, rhs: NodeElement) -> BSTComparisonResult where NodeElement: BSTComparable {
+        guard let comparator = comparator else { return lhs <=> rhs }
+        return comparator(lhs, rhs)
+    }
+}
+
+extension BSTTree {
+    public typealias Node = BinaryTreeNode<NodeElement, NodeExtra>
+    public typealias Element = NodeElement
     /// 添加节点
     /// - Parameter element: 节点元素
-    public func add(element: Element) {
+    public func add(element: Element) where NodeExtra == Void, Element: BSTComparable {
         guard let root = _root else {
             _root = createNode(element: element, parent: nil)
             _size = 1
@@ -71,19 +122,19 @@ public class BST<Element>: BinaryTree<Element> where Element: BSTComparable {
 
     /// 移除节点
     /// - Parameter element: 节点元素
-    public func remove(element: Element) {
+    public func remove(element: Element) where Element: BSTComparable {
         guard let node = node(at: element) else { return }
         remove(node: node)
     }
 
     /// 是否包含某个元素
     /// - Parameter element: 节点元素
-    public func contains(element: Element) -> Bool {
+    public func contains(element: Element) -> Bool where Element: BSTComparable {
         guard let _ = node(at: element) else { return false }
         return true
     }
 
-    internal func createNode(element: Element, parent: Node?) -> Node {
+    internal func createNode(element: Element, parent: Node?) -> Node where NodeExtra == Void {
         return Node(element: element, parent: parent)
     }
 
@@ -130,7 +181,7 @@ public class BST<Element>: BinaryTree<Element> where Element: BSTComparable {
         }
     }
 
-    internal func node(at element: Element) -> Node? {
+    internal func node(at element: Element) -> Node? where Element: BSTComparable {
         var node = _root
         while node != nil {
             switch compare(lhs: element, rhs: node!.element) {
@@ -141,59 +192,24 @@ public class BST<Element>: BinaryTree<Element> where Element: BSTComparable {
         }
         return nil
     }
-
-    override public var debugDescription: String {
-        return super.debugDescription + " size: \(size())"
-    }
 }
 
-private extension BST {
-    func compare(lhs: Element, rhs: Element) -> BSTComparisonResult {
-        guard let comparator = comparator else { return lhs <=> rhs }
-        return comparator(lhs, rhs)
+/// 二叉搜索树
+public class BST<Element>: BSTTree, CustomDebugStringConvertible where Element: BSTComparable {
+    public typealias NodeElement = Element
+    public typealias NodeExtra = Void
+
+    public typealias BSTComparator = (Element, Element) -> BSTComparisonResult
+
+    public var _size = 0
+    public var _root: BinaryTreeNode<NodeElement, NodeExtra>?
+
+    public var comparator: BSTComparator?
+    public required init(comparator: BSTComparator? = nil) {
+        self.comparator = comparator
     }
-}
 
-public extension BSTComparable where Self: Comparable {
-    static func <=> (lhs: Self, rhs: Self) -> BSTComparisonResult {
-        if lhs < rhs {
-            return .lt
-        } else if lhs > rhs {
-            return .gt
-        }
-        return .eq
-    }
-}
-
-extension Int: BSTComparable {}
-extension Int8: BSTComparable {}
-extension Int16: BSTComparable {}
-extension Int32: BSTComparable {}
-extension Int64: BSTComparable {}
-extension UInt: BSTComparable {}
-extension UInt8: BSTComparable {}
-extension UInt16: BSTComparable {}
-extension UInt32: BSTComparable {}
-extension UInt64: BSTComparable {}
-
-extension Float: BSTComparable {
-    public static func <=> (lhs: Self, rhs: Self) -> BSTComparisonResult {
-        if lhs < rhs {
-            return .lt
-        } else if lhs > rhs {
-            return .gt
-        }
-        return .eq
-    }
-}
-
-extension Double: BSTComparable {
-    public static func <=> (lhs: Self, rhs: Self) -> BSTComparisonResult {
-        if lhs < rhs {
-            return .lt
-        } else if lhs > rhs {
-            return .gt
-        }
-        return .eq
+    public var debugDescription: String {
+        return "\(type(of: self)) <\(Unmanaged.passUnretained(self).toOpaque())> size: \(size())"
     }
 }
