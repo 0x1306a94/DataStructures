@@ -5,6 +5,7 @@ import XCTest
         return [
             testCase(AVLTreeTests.allTests),
             testCase(BSTTests.allTests),
+            testCase(RBTests.allTests),
         ]
     }
 #endif

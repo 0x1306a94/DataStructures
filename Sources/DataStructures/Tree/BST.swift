@@ -73,7 +73,7 @@ extension Double: BSTComparable {
     }
 }
 
-public protocol BSTTree: BinaryTree {
+public protocol BSTTreeable: BinaryTreeable {
     typealias BSTComparator = (Element, Element) -> BSTComparisonResult
     var comparator: BSTComparator? { get }
     init(comparator: BSTComparator?)
@@ -83,14 +83,14 @@ public protocol BSTTree: BinaryTree {
     func contains(element: Element) -> Bool
 }
 
-internal extension BSTTree {
+internal extension BSTTreeable {
     func compare(lhs: Element, rhs: Element) -> BSTComparisonResult where Self: ITree, Self.Node.Element == Element, Element: BSTComparable {
         guard let comparator = comparator else { return lhs <=> rhs }
         return comparator(lhs, rhs)
     }
 }
 
-public extension BSTTree {
+public extension BSTTreeable {
     /// 添加节点
     /// - Parameter element: 节点元素
     func add(element: Element) where Self: ITree, Self.Node.Element == Element, Element: BSTComparable, Self.Node.Extra == Void {
@@ -140,7 +140,7 @@ public extension BSTTree {
     }
 }
 
-internal extension BSTTree {
+internal extension BSTTreeable {
     func createNode(element: Element, parent: Self.Node?) -> Self.Node where Self: ITree, Self.Node.Element == Element, Element: BSTComparable, Self.Node.Extra == Void {
         return Self.Node(element: element, parent: parent, extra: ())
     }
@@ -173,7 +173,7 @@ internal extension BSTTree {
             } else if n === n.parent?.right {
                 n.parent?.right = replacement
             }
-            afterRemove(node: node)
+            afterRemove(node: replacement!)
         } else if n.parent == nil { // 叶子节点, 并且是根节点
             self.root = nil
             afterRemove(node: node)
@@ -202,7 +202,7 @@ internal extension BSTTree {
 }
 
 /// 二叉搜索树
-public class BST<Element>: ITree, BSTTree, CustomDebugStringConvertible where Element: BSTComparable {
+public class BSTree<Element>: ITree, BSTTreeable, CustomDebugStringConvertible where Element: BSTComparable {
     internal typealias Node = BinaryTreeNode<Element, Void>
 
     public typealias BSTComparator = (Element, Element) -> BSTComparisonResult
@@ -218,4 +218,10 @@ public class BST<Element>: ITree, BSTTree, CustomDebugStringConvertible where El
     public var debugDescription: String {
         return "\(type(of: self)) <\(Unmanaged.passUnretained(self).toOpaque())> size: \(size)"
     }
+
+    #if ENABLE_DEBUG
+    deinit {
+        print("\(type(of: self)) <\(Unmanaged.passUnretained(self).toOpaque())> deinit")
+    }
+    #endif
 }

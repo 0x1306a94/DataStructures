@@ -9,7 +9,7 @@ import DataStructures
 import Foundation
 
 func testAVL() {
-    let avl = AVL<Int>()
+    let avl = AVLTree<Int>()
     let array: [Int] = [85, 19, 69, 3, 7, 99, 95]
 
     array.forEach { avl.add(element: $0) }
@@ -17,6 +17,7 @@ func testAVL() {
     print(avl)
     assert(avl.size == 7, "size 错误")
 
+    
     var traverseRes: [Int] = []
     avl.preorder { traverseRes.append($0); return false }
     assert(traverseRes == [69, 7, 3, 19, 95, 85, 99], "前序遍历错误")

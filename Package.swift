@@ -23,7 +23,10 @@ let package = Package(
         .target(
             name: "DataStructures",
             dependencies: [],
-            path: "Sources/DataStructures"
+            path: "Sources/DataStructures",
+            swiftSettings: [
+                .define("ENABLE_DEBUG", .when(configuration: .debug)),
+            ]
         ),
         .target(
             name: "Example",

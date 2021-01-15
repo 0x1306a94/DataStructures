@@ -5,9 +5,9 @@
 //  Created by king on 2021/1/14.
 //
 
-public protocol BBSTTree: BSTTree {}
+public protocol BBSTTreeable: BSTTreeable {}
 
-internal extension BBSTTree {
+internal extension BBSTTreeable {
     func rotate(
         r: Self.Node?, // 子树的根节点
         a: Self.Node?, b: Self.Node?, c: Self.Node?,

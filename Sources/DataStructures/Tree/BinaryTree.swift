@@ -36,6 +36,18 @@ internal extension BinaryTreeNodeable {
     var isRighChild: Bool {
         return parent != nil && self === parent?.right
     }
+
+    var sibling: Self? {
+        if isLeftChild {
+            return parent?.right
+        }
+
+        if isRighChild {
+            return parent?.left
+        }
+
+        return nil
+    }
 }
 
 internal final class BinaryTreeNode<Element, Extra>: BinaryTreeNodeable {
@@ -50,22 +62,11 @@ internal final class BinaryTreeNode<Element, Extra>: BinaryTreeNodeable {
         self.parent = parent
         self.extra = extra
     }
-
-    init(element: Element, parent: BinaryTreeNode<Element, Extra>?) where Extra == Void {
-        self.element = element
-        self.parent = parent
-        extra = ()
-    }
-
-    init(element: Element, parent: BinaryTreeNode<Element, Extra>?) where Extra == Int {
-        self.element = element
-        self.parent = parent
-        extra = 1
-    }
-
+    #if ENABLE_DEBUG
     deinit {
-        print("\(type(of: self)) deinit -> element: \(element!)")
+        print("\(type(of: self)) <\(Unmanaged.passUnretained(self).toOpaque())> deinit -> element: \(element!) extra: \(extra!)")
     }
+    #endif
 }
 
 internal protocol ITree: class where Node: BinaryTreeNodeable {
@@ -76,7 +77,7 @@ internal protocol ITree: class where Node: BinaryTreeNodeable {
 }
 
 /// 二叉搜索树
-public protocol BinaryTree: class {
+public protocol BinaryTreeable: class {
     associatedtype Element
 
     var size: Int { get }
@@ -99,7 +100,7 @@ public protocol BinaryTree: class {
     func invertTree()
 }
 
-public extension BinaryTree {
+public extension BinaryTreeable {
     /// 节点总数
     /// 节点总数
 
@@ -302,7 +303,7 @@ public extension BinaryTree {
     }
 }
 
-internal extension BinaryTree {
+internal extension BinaryTreeable {
     func invertTree(node: Self.Node?) where Self: ITree {
         guard let node = node else { return }
 

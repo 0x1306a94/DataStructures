@@ -34,9 +34,9 @@ internal extension BinaryTreeNodeable {
     }
 }
 
-public protocol AVLTree: BBSTTree {}
+public protocol AVLTreeable: BBSTTreeable {}
 
-internal extension AVLTree {
+internal extension AVLTreeable {
     func createNode(element: Element, parent: Self.Node?) -> Self.Node where Self: ITree, Self.Node.Extra == Int, Self.Node.Element == Element {
         return Self.Node(element: element, parent: parent, extra: 1)
     }
@@ -72,7 +72,7 @@ internal extension AVLTree {
     }
 }
 
-extension AVLTree {
+extension AVLTreeable {
     public func add(element: Element) where Self: ITree, Self.Node.Extra == Int, Self.Node.Element == Element, Element: BSTComparable {
         guard let root = self.root else {
             self.root = createNode(element: element, parent: nil)
@@ -136,7 +136,7 @@ extension AVLTree {
 }
 
 /// 平衡二叉搜索树
-public class AVL<Element>: ITree, AVLTree, CustomDebugStringConvertible where Element: BSTComparable {
+public class AVLTree<Element>: ITree, AVLTreeable, CustomDebugStringConvertible where Element: BSTComparable {
     internal typealias Node = BinaryTreeNode<Element, Int>
 
     public typealias BSTComparator = (Element, Element) -> BSTComparisonResult
@@ -152,4 +152,10 @@ public class AVL<Element>: ITree, AVLTree, CustomDebugStringConvertible where El
     public var debugDescription: String {
         return "\(type(of: self)) <\(Unmanaged.passUnretained(self).toOpaque())> size: \(size)"
     }
+
+    #if ENABLE_DEBUG
+    deinit {
+        print("\(type(of: self)) <\(Unmanaged.passUnretained(self).toOpaque())> deinit")
+    }
+    #endif
 }
