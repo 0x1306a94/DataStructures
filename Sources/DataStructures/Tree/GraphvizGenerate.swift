@@ -10,8 +10,8 @@ import Foundation
 internal extension BinaryTree {
     /// 生成 Graphviz dot 规则, 可通过 https://dreampuf.github.io/GraphvizOnline 在线预览
     /// - Returns: Graphviz dot 规则文本
-    func generateDot() -> String {
-        guard let root = _root else { return "" }
+    func generateDot() -> String where Self: ITree {
+        guard let root = self.root else { return "" }
         var dotArray: [String] = [
             "digraph G {{",
             "\tgraph [nodesep=0.1]",
@@ -24,8 +24,8 @@ internal extension BinaryTree {
             dotArray.append("\t\"\(val)\" [group=\"\(val)\", label=\"\(val)\"]")
         }
 
-        func printNode(root: Node, out: inout [String]) {
-            var target: Element?
+        func printNode(root: Self.Node, out: inout [String]) where Self: ITree {
+            var target: Self.Node.Element?
             var distance = 0
 
             let rootVal = "\(String(describing: root.element!))"

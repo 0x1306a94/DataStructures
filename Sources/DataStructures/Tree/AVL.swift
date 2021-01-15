@@ -5,7 +5,7 @@
 ////  Created by king on 2021/1/6.
 ////
 
-internal extension BinaryTreeNode {
+internal extension BinaryTreeNodeable {
     func height() -> Int where Extra == Int {
         return extra
     }
@@ -22,7 +22,7 @@ internal extension BinaryTreeNode {
         extra = 1 + max(leftHeight, rightHeight)
     }
 
-    func tallerChild() -> BinaryTreeNode? where Extra == Int {
+    func tallerChild() -> Self? where Extra == Int {
         let leftHeight = left?.height() ?? 0
         let rightHeight = right?.height() ?? 0
         if leftHeight > rightHeight {
@@ -37,19 +37,19 @@ internal extension BinaryTreeNode {
 public protocol AVLTree: BBSTTree {}
 
 internal extension AVLTree {
-    func createNode(element: Element, parent: Node?) -> Node where NodeExtra == Int {
-        return Node(element: element, parent: parent)
+    func createNode(element: Element, parent: Self.Node?) -> Self.Node where Self: ITree, Self.Node.Extra == Int, Self.Node.Element == Element {
+        return Self.Node(element: element, parent: parent, extra: 1)
     }
 
-    func isBlanced(node: Node) -> Bool where NodeExtra == Int {
+    func isBlanced(node: Self.Node) -> Bool where Self: ITree, Self.Node.Extra == Int {
         return abs(node.blanceFactor()) <= 1
     }
 
-    func updateHeight(node: Node) where NodeExtra == Int {
+    func updateHeight(node: Self.Node) where Self: ITree, Self.Node.Extra == Int {
         node.updateHeight()
     }
 
-    func rebalance(grand: Node) where NodeExtra == Int {
+    func rebalance(grand: Self.Node) where Self: ITree, Self.Node.Extra == Int {
         guard let parent = grand.tallerChild(), let node = parent.tallerChild() else { return }
         if parent.isLeftChild { // L
             if node.isLeftChild { // LL
@@ -73,16 +73,16 @@ internal extension AVLTree {
 }
 
 extension AVLTree {
-    public func add(element: Element) where NodeExtra == Int, Element: BSTComparable {
-        guard let root = _root else {
-            _root = createNode(element: element, parent: nil)
-            _size = 1
-            afterAdd(node: _root!)
+    public func add(element: Element) where Self: ITree, Self.Node.Extra == Int, Self.Node.Element == Element, Element: BSTComparable {
+        guard let root = self.root else {
+            self.root = createNode(element: element, parent: nil)
+            size = 1
+            afterAdd(node: self.root!)
             return
         }
 
-        var node: Node? = root
-        var parent: Node? = root
+        var node: Self.Node? = root
+        var parent: Self.Node? = root
         var cmp: BSTComparisonResult = .eq
 
         while node != nil {
@@ -100,12 +100,12 @@ extension AVLTree {
         } else {
             parent?.right = addNode
         }
-        _size += 1
+        size += 1
 
         afterAdd(node: addNode)
     }
 
-    internal func afterAdd(node: Node) where NodeElement: BSTComparable, NodeExtra == Int {
+    internal func afterAdd(node: Self.Node) where Self: ITree, Self.Node.Element: BSTComparable, Self.Node.Extra == Int {
         var _node = node
         while _node.parent != nil {
             _node = _node.parent!
@@ -120,7 +120,7 @@ extension AVLTree {
         }
     }
 
-    internal func afterRemove(node: Node) where NodeElement: BSTComparable, NodeExtra == Int {
+    internal func afterRemove(node: Self.Node) where Self: ITree, Self.Node.Element: BSTComparable, Self.Node.Extra == Int {
         var _node = node
         while _node.parent != nil {
             _node = _node.parent!
@@ -136,21 +136,20 @@ extension AVLTree {
 }
 
 /// 平衡二叉搜索树
-public class AVL<Element>: AVLTree, CustomDebugStringConvertible where Element: BSTComparable {
-    public typealias NodeElement = Element
-    public typealias NodeExtra = Int
+public class AVL<Element>: ITree, AVLTree, CustomDebugStringConvertible where Element: BSTComparable {
+    internal typealias Node = BinaryTreeNode<Element, Int>
 
     public typealias BSTComparator = (Element, Element) -> BSTComparisonResult
 
-    public var _size = 0
-    public var _root: BinaryTreeNode<NodeElement, NodeExtra>?
+    public internal(set) var size = 0
+    internal var root: Node?
 
-    public var comparator: BSTComparator?
+    public internal(set) var comparator: BSTComparator?
     public required init(comparator: BSTComparator? = nil) {
         self.comparator = comparator
     }
 
     public var debugDescription: String {
-        return "\(type(of: self)) <\(Unmanaged.passUnretained(self).toOpaque())> size: \(size())"
+        return "\(type(of: self)) <\(Unmanaged.passUnretained(self).toOpaque())> size: \(size)"
     }
 }

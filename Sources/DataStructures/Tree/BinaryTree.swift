@@ -7,13 +7,20 @@
 
 import Foundation
 
-public class BinaryTreeNode<Element, Extra> {
-    var element: Element!
-    var extra: Extra
-    var left: BinaryTreeNode?
-    var right: BinaryTreeNode?
-    weak var parent: BinaryTreeNode?
+public protocol BinaryTreeNodeable: class {
+    associatedtype Element
+    associatedtype Extra
 
+    var element: Element! { get set }
+    var extra: Extra! { get set }
+    var left: Self? { get set }
+    var right: Self? { get set }
+    var parent: Self? { get set }
+
+    init(element: Element, parent: Self?, extra: Extra)
+}
+
+internal extension BinaryTreeNodeable {
     var isLeaf: Bool {
         return left == nil && right == nil
     }
@@ -29,20 +36,28 @@ public class BinaryTreeNode<Element, Extra> {
     var isRighChild: Bool {
         return parent != nil && self === parent?.right
     }
+}
 
-    init(element: Element, parent: BinaryTreeNode?, extra: Extra) {
+internal final class BinaryTreeNode<Element, Extra>: BinaryTreeNodeable {
+    var element: Element!
+    var extra: Extra!
+    var left: BinaryTreeNode<Element, Extra>?
+    var right: BinaryTreeNode<Element, Extra>?
+    weak var parent: BinaryTreeNode<Element, Extra>?
+
+    required init(element: Element, parent: BinaryTreeNode<Element, Extra>?, extra: Extra) {
         self.element = element
         self.parent = parent
         self.extra = extra
     }
 
-    init(element: Element, parent: BinaryTreeNode?) where Extra == Void {
+    init(element: Element, parent: BinaryTreeNode<Element, Extra>?) where Extra == Void {
         self.element = element
         self.parent = parent
         extra = ()
     }
 
-    init(element: Element, parent: BinaryTreeNode?) where Extra == Int {
+    init(element: Element, parent: BinaryTreeNode<Element, Extra>?) where Extra == Int {
         self.element = element
         self.parent = parent
         extra = 1
@@ -53,40 +68,58 @@ public class BinaryTreeNode<Element, Extra> {
     }
 }
 
+internal protocol ITree: class where Node: BinaryTreeNodeable {
+    associatedtype Node
+
+    var size: Int { get set }
+    var root: Node? { get set }
+}
+
 /// 二叉搜索树
 public protocol BinaryTree: class {
-    associatedtype NodeElement
-    associatedtype NodeExtra
+    associatedtype Element
 
-    var _size: Int { get set }
-    var _root: BinaryTreeNode<NodeElement, NodeExtra>? { get set }
+    var size: Int { get }
+    var isEmpty: Bool { get }
+
+    func clear()
+
+    func preorder(_ visit: (Element) -> Bool)
+
+    func inorder(_ visit: (Element) -> Bool)
+
+    func postorder(_ visit: (Element) -> Bool)
+
+    func levelOrder(_ visitor: (Element) -> Bool)
+
+    func height() -> Int
+
+    func isComplete() -> Bool
+
+    func invertTree()
 }
 
 public extension BinaryTree {
-    typealias Node = BinaryTreeNode<NodeElement, NodeExtra>
-    typealias Element = NodeElement
     /// 节点总数
     /// 节点总数
-    func size() -> Int {
-        return _size
+
+    var isEmpty: Bool {
+        return self.size == 0
     }
 
     /// 是否为空
-    func empty() -> Bool {
-        return _size == 0
-    }
 
     /// 清空
-    func clear() {
-        _size = 0
-        _root = nil
+    func clear() where Self: ITree {
+        self.size = 0
+        self.root = nil
     }
 
     // MARK: - 遍历
 
     /// 前序遍历
     /// - Parameter visit: return true 中断遍历
-    func preorder(_ visit: (Element) -> Bool) {
+    func preorder(_ visit: (Element) -> Bool) where Self: ITree, Self.Node.Element == Element {
 //        guard let _ = _root else { return }
 //
 //        var node = _root
@@ -112,10 +145,10 @@ public extension BinaryTree {
 //            }
 //        }
 
-        guard let root = _root else { return }
+        guard let root = self.root else { return }
 
         // 用数组模拟栈
-        var stack: [Node] = [root]
+        var stack = [root]
 
         while !stack.isEmpty {
             let node = stack.removeLast()
@@ -136,11 +169,11 @@ public extension BinaryTree {
 
     /// 中序遍历
     /// - Parameter visit: return true 中断遍历
-    func inorder(_ visit: (Element) -> Bool) {
-        guard let _ = _root else { return }
+    func inorder(_ visit: (Element) -> Bool) where Self: ITree, Self.Node.Element == Element {
+        guard let _ = self.root else { return }
 
-        var node = _root
-        var stack: [Node] = []
+        var node = self.root
+        var stack: [Self.Node] = []
         while true {
             if node != nil {
                 stack.append(node!)
@@ -161,12 +194,12 @@ public extension BinaryTree {
 
     /// 后序遍历
     /// - Parameter visit: return true 中断遍历
-    func postorder(_ visit: (Element) -> Bool) {
-        guard let root = _root else { return }
+    func postorder(_ visit: (Element) -> Bool) where Self: ITree, Self.Node.Element == Element {
+        guard let root = self.root else { return }
 
-        var stack: [Node] = [root]
+        var stack = [root]
         // 记录上一次访问的节点
-        var prev: Node?
+        var prev: Self.Node?
         while !stack.isEmpty {
             let top = stack.last!
             if top.isLeaf || (prev != nil && prev!.parent === top) {
@@ -190,9 +223,9 @@ public extension BinaryTree {
 
     /// 层序遍历
     /// - Parameter visitor: return true 中断遍历
-    func levelOrder(_ visitor: (Element) -> Bool) {
-        guard let root = _root else { return }
-        var queue: [Node] = [root]
+    func levelOrder(_ visitor: (Element) -> Bool) where Self: ITree, Self.Node.Element == Element {
+        guard let root = self.root else { return }
+        var queue = [root]
 
         while !queue.isEmpty {
             let node = queue.removeFirst()
@@ -209,9 +242,9 @@ public extension BinaryTree {
         }
     }
 
-    func height() -> Int {
-        guard let root = _root else { return 0 }
-        var queue: [Node] = [root]
+    func height() -> Int where Self: ITree {
+        guard let root = self.root else { return 0 }
+        var queue = [root]
         var height = 0
         var levelSize = 1
 
@@ -234,9 +267,9 @@ public extension BinaryTree {
         return height
     }
 
-    func isComplete() -> Bool {
-        guard let root = _root else { return false }
-        var queue: [Node] = [root]
+    func isComplete() -> Bool where Self: ITree {
+        guard let root = self.root else { return false }
+        var queue = [root]
 
         var leaf = false
         while !queue.isEmpty {
@@ -264,11 +297,13 @@ public extension BinaryTree {
 
     // MARK: - 翻转二叉树
 
-    func invertTree() {
-        invertTree(node: _root)
+    func invertTree() where Self: ITree {
+        invertTree(node: self.root)
     }
+}
 
-    func invertTree(node: Node?) {
+internal extension BinaryTree {
+    func invertTree(node: Self.Node?) where Self: ITree {
         guard let node = node else { return }
 
         // 前序递归遍历
@@ -313,12 +348,10 @@ public extension BinaryTree {
             }
         }
     }
-}
 
-internal extension BinaryTree {
     // MARK: - 前驱节点
 
-    func predecessor(node: Node?) -> Node? {
+    func predecessor(node: Self.Node?) -> Self.Node? where Self: ITree {
         guard var n = node else { return node }
 
         var p = n.left
@@ -342,7 +375,7 @@ internal extension BinaryTree {
 
     // MARK: - 后继节点
 
-    func successor(node: Node?) -> Node? {
+    func successor(node: Self.Node?) -> Self.Node? where Self: ITree {
         guard var n = node else { return node }
 
         var p = n.right

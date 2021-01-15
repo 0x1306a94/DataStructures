@@ -17,7 +17,7 @@ final class BSTTests: XCTestCase {
 
         print(bst)
         print(bst.generateDot())
-        XCTAssertEqual(bst.size(), 7)
+        XCTAssertEqual(bst.size, 7)
 
         var traverseRes: [Int] = []
         bst.preorder { traverseRes.append($0); return false }

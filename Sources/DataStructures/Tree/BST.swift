@@ -21,9 +21,12 @@ public protocol BSTComparable: Equatable {
 }
 
 public enum BSTComparisonResult {
-    case lt // 小于
-    case gt // 大于
-    case eq // 等于
+    /// 小于
+    case lt
+    /// 大于
+    case gt
+    /// 等于
+    case eq
 }
 
 public extension BSTComparable where Self: Comparable {
@@ -71,33 +74,35 @@ extension Double: BSTComparable {
 }
 
 public protocol BSTTree: BinaryTree {
-    typealias BSTComparator = (NodeElement, NodeElement) -> BSTComparisonResult
-    var comparator: BSTComparator? { get set }
+    typealias BSTComparator = (Element, Element) -> BSTComparisonResult
+    var comparator: BSTComparator? { get }
     init(comparator: BSTComparator?)
+
+    func add(element: Element)
+    func remove(element: Element)
+    func contains(element: Element) -> Bool
 }
 
 internal extension BSTTree {
-    func compare(lhs: NodeElement, rhs: NodeElement) -> BSTComparisonResult where NodeElement: BSTComparable {
+    func compare(lhs: Element, rhs: Element) -> BSTComparisonResult where Self: ITree, Self.Node.Element == Element, Element: BSTComparable {
         guard let comparator = comparator else { return lhs <=> rhs }
         return comparator(lhs, rhs)
     }
 }
 
-extension BSTTree {
-    public typealias Node = BinaryTreeNode<NodeElement, NodeExtra>
-    public typealias Element = NodeElement
+public extension BSTTree {
     /// 添加节点
     /// - Parameter element: 节点元素
-    public func add(element: Element) where NodeExtra == Void, Element: BSTComparable {
-        guard let root = _root else {
-            _root = createNode(element: element, parent: nil)
-            _size = 1
-            afterAdd(node: _root!)
+    func add(element: Element) where Self: ITree, Self.Node.Element == Element, Element: BSTComparable, Self.Node.Extra == Void {
+        guard let root = self.root else {
+            self.root = createNode(element: element, parent: nil)
+            self.size = 1
+            afterAdd(node: self.root!)
             return
         }
 
-        var node: Node? = root
-        var parent: Node? = root
+        var node: Self.Node? = root
+        var parent: Self.Node? = root
         var cmp: BSTComparisonResult = .eq
 
         while node != nil {
@@ -115,35 +120,37 @@ extension BSTTree {
         } else {
             parent?.right = addNode
         }
-        _size += 1
+        self.size += 1
 
         afterAdd(node: addNode)
     }
 
     /// 移除节点
     /// - Parameter element: 节点元素
-    public func remove(element: Element) where Element: BSTComparable {
+    func remove(element: Element) where Self: ITree, Self.Node.Element == Element, Element: BSTComparable {
         guard let node = node(at: element) else { return }
         remove(node: node)
     }
 
     /// 是否包含某个元素
     /// - Parameter element: 节点元素
-    public func contains(element: Element) -> Bool where Element: BSTComparable {
+    func contains(element: Element) -> Bool where Self: ITree, Self.Node.Element == Element, Element: BSTComparable {
         guard let _ = node(at: element) else { return false }
         return true
     }
+}
 
-    internal func createNode(element: Element, parent: Node?) -> Node where NodeExtra == Void {
-        return Node(element: element, parent: parent)
+internal extension BSTTree {
+    func createNode(element: Element, parent: Self.Node?) -> Self.Node where Self: ITree, Self.Node.Element == Element, Element: BSTComparable, Self.Node.Extra == Void {
+        return Self.Node(element: element, parent: parent, extra: ())
     }
 
-    internal func afterAdd(node _: Node) {}
+    func afterAdd(node _: Self.Node) where Self: ITree {}
 
-    internal func afterRemove(node _: Node) {}
+    func afterRemove(node _: Self.Node) where Self: ITree {}
 
-    internal func remove(node: Node) {
-        _size -= 1
+    func remove(node: Self.Node) where Self: ITree {
+        size -= 1
         var n = node
         if node.hasTowChildren { // 度为2的节点
             // 用后继节点的值覆盖node 的值
@@ -160,7 +167,7 @@ extension BSTTree {
             replacement?.parent = n.parent
             // 更新 parent left 或者 right 指向
             if n.parent == nil { // node 是度为1的节点并且是根节点
-                _root = replacement
+                self.root = replacement
             } else if n === n.parent?.left {
                 n.parent?.left = replacement
             } else if n === n.parent?.right {
@@ -168,7 +175,7 @@ extension BSTTree {
             }
             afterRemove(node: node)
         } else if n.parent == nil { // 叶子节点, 并且是根节点
-            _root = nil
+            self.root = nil
             afterRemove(node: node)
         } else { // 叶子节点, 但不是根节点
             if n === n.parent?.left {
@@ -181,8 +188,8 @@ extension BSTTree {
         }
     }
 
-    internal func node(at element: Element) -> Node? where Element: BSTComparable {
-        var node = _root
+    func node(at element: Element) -> Self.Node? where Self: ITree, Self.Node.Element == Element, Element: BSTComparable {
+        var node = self.root
         while node != nil {
             switch compare(lhs: element, rhs: node!.element) {
             case .lt: node = node!.left
@@ -195,21 +202,20 @@ extension BSTTree {
 }
 
 /// 二叉搜索树
-public class BST<Element>: BSTTree, CustomDebugStringConvertible where Element: BSTComparable {
-    public typealias NodeElement = Element
-    public typealias NodeExtra = Void
+public class BST<Element>: ITree, BSTTree, CustomDebugStringConvertible where Element: BSTComparable {
+    internal typealias Node = BinaryTreeNode<Element, Void>
 
     public typealias BSTComparator = (Element, Element) -> BSTComparisonResult
 
-    public var _size = 0
-    public var _root: BinaryTreeNode<NodeElement, NodeExtra>?
+    public internal(set) var size = 0
+    internal var root: Node?
 
-    public var comparator: BSTComparator?
+    public internal(set) var comparator: BSTComparator?
     public required init(comparator: BSTComparator? = nil) {
         self.comparator = comparator
     }
 
     public var debugDescription: String {
-        return "\(type(of: self)) <\(Unmanaged.passUnretained(self).toOpaque())> size: \(size())"
+        return "\(type(of: self)) <\(Unmanaged.passUnretained(self).toOpaque())> size: \(size)"
     }
 }

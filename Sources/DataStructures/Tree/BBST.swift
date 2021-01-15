@@ -9,11 +9,11 @@ public protocol BBSTTree: BSTTree {}
 
 internal extension BBSTTree {
     func rotate(
-        r: Node?, // 子树的根节点
-        a: Node?, b: Node?, c: Node?,
-        d: Node?,
-        e: Node?, f: Node?, g: Node?
-    ) {
+        r: Self.Node?, // 子树的根节点
+        a: Self.Node?, b: Self.Node?, c: Self.Node?,
+        d: Self.Node?,
+        e: Self.Node?, f: Self.Node?, g: Self.Node?
+    ) where Self: ITree {
         // 让d成为这棵子树的根节点
         d?.parent = r?.parent
         if r?.isLeftChild ?? false {
@@ -21,7 +21,7 @@ internal extension BBSTTree {
         } else if r?.isRighChild ?? false {
             r?.parent?.right = d
         } else {
-            _root = d
+            self.root = d
         }
 
         // a b c
@@ -53,7 +53,7 @@ internal extension BBSTTree {
         f?.parent = d
     }
 
-    func rotateLeft(grand: Node) {
+    func rotateLeft(grand: Self.Node) where Self: ITree {
         let parent = grand.right
         let child = parent?.left
         grand.right = child
@@ -62,7 +62,7 @@ internal extension BBSTTree {
         afterRotate(grand: grand, parent: parent, child: child)
     }
 
-    func rotateRight(grand: Node) {
+    func rotateRight(grand: Self.Node) where Self: ITree {
         let parent = grand.left
         let child = parent?.right
         grand.left = child
@@ -71,15 +71,15 @@ internal extension BBSTTree {
         afterRotate(grand: grand, parent: parent, child: child)
     }
 
-    func afterRotate(grand: Node?, parent: Node?, child: Node?) {
+    func afterRotate(grand: Self.Node?, parent: Self.Node?, child: Self.Node?) where Self: ITree {
         // 让parent成为子树的根节点
         parent?.parent = grand?.parent
         if grand?.isLeftChild ?? false {
             grand?.parent?.left = parent
         } else if grand?.isRighChild ?? false {
             grand?.parent?.right = parent
-        } else { // node 是root 节点
-            _root = parent
+        } else { // Self.Node 是root 节点
+            self.root = parent
         }
 
         // 更新child的parent

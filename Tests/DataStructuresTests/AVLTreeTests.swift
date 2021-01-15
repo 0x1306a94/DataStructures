@@ -16,7 +16,7 @@ final class AVLTreeTests: XCTestCase {
 
         print(avl)
         print(avl.generateDot())
-        XCTAssertEqual(avl.size(), 7)
+        XCTAssertEqual(avl.size, 7)
 
         var traverseRes: [Int] = []
         avl.preorder { traverseRes.append($0); return false }

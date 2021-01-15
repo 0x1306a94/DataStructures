@@ -15,7 +15,7 @@ func testAVL() {
     array.forEach { avl.add(element: $0) }
 
     print(avl)
-    assert(avl.size() == 7, "size 错误")
+    assert(avl.size == 7, "size 错误")
 
     var traverseRes: [Int] = []
     avl.preorder { traverseRes.append($0); return false }
