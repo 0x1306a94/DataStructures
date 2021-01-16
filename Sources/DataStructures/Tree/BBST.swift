@@ -53,7 +53,7 @@ internal extension BBSTTreeable {
         f?.parent = d
     }
 
-    func rotateLeft(grand: Self.Node) where Self: ITree {
+    func rotateLeft(_ grand: Self.Node) where Self: ITree {
         let parent = grand.right
         let child = parent?.left
         grand.right = child
@@ -62,7 +62,7 @@ internal extension BBSTTreeable {
         afterRotate(grand: grand, parent: parent, child: child)
     }
 
-    func rotateRight(grand: Self.Node) where Self: ITree {
+    func rotateRight(_ grand: Self.Node) where Self: ITree {
         let parent = grand.left
         let child = parent?.right
         grand.left = child

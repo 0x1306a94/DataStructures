@@ -18,19 +18,23 @@ internal extension RBTreeable {
         return Self.Node(element: element, parent: parent, extra: .red)
     }
 
+    @discardableResult
     func color(node: Self.Node?, color: RBColor) -> Self.Node? where Self: ITree, Self.Node.Extra == RBColor {
         node?.extra = color
         return node
     }
 
+    @discardableResult
     func colorOf(node: Self.Node?) -> RBColor where Self: ITree, Self.Node.Extra == RBColor {
         return node?.extra ?? .black
     }
 
+    @discardableResult
     func red(node: Self.Node?) -> Self.Node? where Self: ITree, Self.Node.Extra == RBColor {
         return color(node: node, color: .red)
     }
 
+    @discardableResult
     func black(node: Self.Node?) -> Self.Node? where Self: ITree, Self.Node.Extra == RBColor {
         return color(node: node, color: .black)
     }
@@ -46,7 +50,7 @@ internal extension RBTreeable {
     func afterAdd(node: Self.Node) where Self: ITree, Self.Node.Element: BSTComparable, Self.Node.Extra == RBColor {
         guard let parent = node.parent else {
             // 添加的是根节点 或者 上溢到达了根节点
-            _ = black(node: node)
+            black(node: node)
             return
         }
 
@@ -61,8 +65,8 @@ internal extension RBTreeable {
         let grand = red(node: parent.parent)
 
         if isRed(node: uncle) { // 叔父节点是红色【B树节点上溢】
-            _ = black(node: parent)
-            _ = black(node: uncle)
+            black(node: parent)
+            black(node: uncle)
             // 把祖父节点当做是新添加的节点
             afterAdd(node: grand!)
             return
@@ -71,20 +75,20 @@ internal extension RBTreeable {
         // 叔父节点不是红色
         if parent.isLeftChild { // L
             if node.isLeftChild { // LL
-                _ = black(node: parent)
+                black(node: parent)
             } else { // LR
-                _ = black(node: node)
-                rotateLeft(grand: parent)
+                black(node: node)
+                rotateLeft(parent)
             }
-            rotateRight(grand: grand!)
+            rotateRight(grand!)
         } else { // R
             if node.isLeftChild { // RL
-                _ = black(node: node)
-                rotateRight(grand: parent)
+                black(node: node)
+                rotateRight(parent)
             } else { // RR
-                _ = black(node: parent)
+                black(node: parent)
             }
-            rotateLeft(grand: grand!)
+            rotateLeft(grand!)
         }
     }
 
@@ -92,7 +96,7 @@ internal extension RBTreeable {
         // 如果删除的节点是红色
         // 或者 用以取代删除节点的子节点是红色
         if isRed(node: node) {
-            _ = black(node: node)
+            black(node: node)
             return
         }
 
@@ -107,9 +111,9 @@ internal extension RBTreeable {
         var sibling = left ? parent.right : parent.left
         if left { // 被删除的节点在左边，兄弟节点在右边
             if isRed(node: sibling) {
-                _ = black(node: sibling)
-                _ = red(node: parent)
-                rotateLeft(grand: parent)
+                black(node: sibling)
+                red(node: parent)
+                rotateLeft(parent)
                 // 更换兄弟
                 sibling = parent.right
             }
@@ -118,28 +122,28 @@ internal extension RBTreeable {
             if isBlack(node: sibling?.left), isBlack(node: sibling?.right) {
                 // 兄弟节点没有1个红色子节点，父节点要向下跟兄弟节点合并
                 let parentBlack = isBlack(node: parent)
-                _ = black(node: parent)
-                _ = red(node: sibling)
+                black(node: parent)
+                red(node: sibling)
                 if parentBlack {
                     afterRemove(node: parent)
                 }
             } else { // 兄弟节点至少有1个红色子节点，向兄弟节点借元素
                 // 兄弟节点的左边是黑色，兄弟要先旋转
                 if isBlack(node: sibling?.right) {
-                    rotateRight(grand: sibling!)
+                    rotateRight(sibling!)
                     sibling = parent.right
                 }
 
-                _ = color(node: sibling, color: colorOf(node: parent))
-                _ = black(node: sibling?.right)
-                _ = black(node: parent)
-                rotateLeft(grand: parent)
+                color(node: sibling, color: colorOf(node: parent))
+                black(node: sibling?.right)
+                black(node: parent)
+                rotateLeft(parent)
             }
         } else { // 被删除的节点在右边，兄弟节点在左边
             if isRed(node: sibling) { // 兄弟节点是红色
-                _ = black(node: sibling)
-                _ = red(node: parent)
-                rotateRight(grand: parent)
+                black(node: sibling)
+                red(node: parent)
+                rotateRight(parent)
                 // 更换兄弟
                 sibling = parent.left
             }
@@ -147,22 +151,22 @@ internal extension RBTreeable {
             if isBlack(node: sibling?.left), isBlack(node: sibling?.right) {
                 // 兄弟节点没有1个红色子节点，父节点要向下跟兄弟节点合并
                 let parentBlack = isBlack(node: parent)
-                _ = black(node: parent)
-                _ = red(node: sibling)
+                black(node: parent)
+                red(node: sibling)
                 if parentBlack {
                     afterRemove(node: parent)
                 }
             } else { // 兄弟节点至少有1个红色子节点，向兄弟节点借元素
                 // 兄弟节点的左边是黑色，兄弟要先旋转
                 if isBlack(node: sibling?.left) {
-                    rotateLeft(grand: sibling!)
+                    rotateLeft(sibling!)
                     sibling = parent.left
                 }
 
-                _ = color(node: sibling, color: colorOf(node: parent))
-                _ = black(node: sibling?.left)
-                _ = black(node: parent)
-                rotateRight(grand: parent)
+                color(node: sibling, color: colorOf(node: parent))
+                black(node: sibling?.left)
+                black(node: parent)
+                rotateRight(parent)
             }
         }
     }

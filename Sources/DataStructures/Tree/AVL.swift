@@ -53,17 +53,17 @@ internal extension AVLTreeable {
         guard let parent = grand.tallerChild(), let node = parent.tallerChild() else { return }
         if parent.isLeftChild { // L
             if node.isLeftChild { // LL
-                rotateRight(grand: grand)
+                rotateRight(grand)
             } else { // LR
-                rotateLeft(grand: parent)
-                rotateRight(grand: grand)
+                rotateLeft(parent)
+                rotateRight(grand)
             }
         } else { // R
             if node.isLeftChild { // RL
-                rotateRight(grand: parent)
-                rotateLeft(grand: grand)
+                rotateRight(parent)
+                rotateLeft(grand)
             } else { // RR
-                rotateLeft(grand: grand)
+                rotateLeft(grand)
             }
         }
 
